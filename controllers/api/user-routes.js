@@ -48,10 +48,10 @@ router.post('/', async (req, res) => {
       username: req.body.username,
       email: req.body.email,
       password: req.body.password,
-    });
-    req.session.save(() => {
-      req.session.user_id = dbUserData.id;
-      req.session.username = dbUserData.username;
+    }); // Do I need to have this async here?
+    req.session.save(async () => {
+      dbUserData.id = await req.session.user_id;
+      dbUserData.username = await req.session.username;
       req.session.loggedIn = true;
 
       res.json(dbUserData);
@@ -61,16 +61,6 @@ router.post('/', async (req, res) => {
     res.status(500).json(err);
   }
 });
-// Do these ^ v two have the same functionality ?
-// .then((dbUserData) => {
-//     req.session.save(() => {
-//       req.session.user_id = dbUserData.id;
-//       req.session.username = dbUserData.username;
-//       req.session.loggedIn = true;
-
-//       res.json(dbUserData);
-//     });
-//   })
 
 router.post('/login', async (req, res) => {
   try {
@@ -84,9 +74,9 @@ router.post('/login', async (req, res) => {
       res.status(400).json({ message: 'Incorrect password!' });
       return;
     }
-    req.session.save(() => {
-      req.session.user_id = dbUserData.id;
-      req.session.username = dbUserData.username;
+    req.session.save(async () => {
+      dbUserData.id = await req.session.user_id;
+      dbUserData.username = await req.session.username;
       req.session.loggedIn = true;
 
       res.json({ user: dbUserData, message: 'You are now logged in!' });
@@ -96,34 +86,6 @@ router.post('/login', async (req, res) => {
     res.status(500).json(err);
   }
 });
-
-// router.post('/login', (req, res) => {
-//   User.findOne({
-//     where: {
-//       email: req.body.email,
-//     },
-//   }).then((dbUserData) => {
-//     if (!dbUserData) {
-//       res.status(400).json({ message: 'No user with that email address!' });
-//       return;
-//     }
-
-//     const validPassword = dbUserData.checkPassword(req.body.password);
-
-//     if (!validPassword) {
-//       res.status(400).json({ message: 'Incorrect password!' });
-//       return;
-//     }
-
-//     req.session.save(() => {
-//       req.session.user_id = dbUserData.id;
-//       req.session.username = dbUserData.username;
-//       req.session.loggedIn = true;
-
-//       res.json({ user: dbUserData, message: 'You are now logged in!' });
-//     });
-//   });
-// });
 
 router.post('/logout', (req, res) => {
   if (req.session.loggedIn) {
